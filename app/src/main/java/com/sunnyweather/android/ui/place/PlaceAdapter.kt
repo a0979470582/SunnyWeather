@@ -1,6 +1,8 @@
 package com.sunnyweather.android.ui.place
 
 import android.content.Intent
+import android.util.Log
+import android.util.TimeUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +10,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.sunnyweather.android.R
 import com.sunnyweather.android.logic.model.Place
+import com.sunnyweather.android.ui.weather.WeatherActivity
+import java.util.concurrent.TimeUnit
 
 class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: List<Place>) : RecyclerView.Adapter<PlaceAdapter.ViewHolder>() {
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -16,8 +20,23 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        Log.e("onCreateViewHodler", parent.toString())
         val view = LayoutInflater.from(parent.context).inflate(R.layout.place_item, parent, false)
-        return ViewHolder(view)
+        val holder = ViewHolder(view)
+        holder.itemView.setOnClickListener {
+            val position = holder.adapterPosition
+            val place = placeList[position]
+            val intent = Intent(parent.context, WeatherActivity::class.java).apply {
+                putExtra("location_lng", place.location.lng)
+                putExtra("location_lat", place.location.lat)
+                putExtra("place_name", place.name)
+            }
+            fragment.viewModel.savePlace(place)
+            fragment.startActivity(intent)
+            Log.e("onCreateViewHolder", Thread.currentThread().name)
+            fragment.activity?.finish()
+        }
+        return holder
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
